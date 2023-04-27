@@ -6,23 +6,22 @@
 //  Copyright © 2019 Millman. All rights reserved.
 //
 
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 
 public class SliderStatus: ObservableObject {
     public let objectDidChange = PassthroughSubject<SliderStatus, Never>()
     var parentSize = CGSize.zero
     var sliderWidth: CGFloat {
-        get {
-            switch self.maxWidth {
-            case .percent(let rate):
-                return parentSize.width*rate
-            case .width(let value):
-                return value
-            }
+        switch maxWidth {
+        case let .percent(rate):
+            return parentSize.width * rate
+        case let .width(value):
+            return value
         }
     }
+
     var shadowRadius: CGFloat = 0
     var showRate: CGFloat = 0
     public var currentStatus: ShowStatus = .hide {
@@ -32,55 +31,57 @@ public class SliderStatus: ObservableObject {
                 showRate = 0
             case .show:
                 showRate = 1
-            case .moving(let offset):
-                let width = parentSize.width/2
-                if self.type.isLeft {
-                    showRate = self.type.isRear ? 1-(width-offset)/width : (width+offset)/width
+            case let .moving(offset):
+                let width = parentSize.width / 2
+                if type.isLeft {
+                    showRate = type.isRear ? 1 - (width - offset) / width : (width + offset) / width
                 } else {
-                    showRate = (width-offset)/width
+                    showRate = (width - offset) / width
                 }
             }
             objectDidChange.send(self)
         }
     }
+
     public var type: SliderType {
         didSet {
             objectDidChange.send(self)
         }
     }
+
     var maxWidth: SliderWidth = .percent(rate: 0.5) {
         didSet {
             objectDidChange.send(self)
         }
     }
-    
+
     func sliderOffset() -> CGFloat {
-        if self.type == .none {
-            return 0
+        if type == SliderType.none {
+            return CGFloat(0)
         }
-        let rearW = self.sliderWidth
-        if self.type.isRear {
+        let rearW = sliderWidth
+        if type.isRear {
             switch currentStatus {
             case .hide:
-                return 0
-            case .moving(let offset):
+                return CGFloat(0.0)
+            case let .moving(offset):
                 return offset
             case .show:
-                return self.type.isLeft ? rearW : -rearW
+                return type.isLeft ? rearW : -1.0 * rearW
             }
         } else {
             switch currentStatus {
             case .hide:
-                return self.type.isLeft ? -parentSize.width : parentSize.width
-            case .moving(let offset):
-                let o = self.type.isLeft ? offset : parentSize.width-rearW+offset
-                return o
+                return type.isLeft ? -parentSize.width : parentSize.width
+            case let .moving(offset):
+                let offset = type.isLeft ? offset : parentSize.width - rearW + offset
+                return offset
             case .show:
-                return self.type.isLeft ? 0 : parentSize.width-rearW
+                return type.isLeft ? CGFloat(0.0) : parentSize.width - rearW
             }
         }
     }
-    
+
     init(type: SliderType) {
         self.type = type
     }

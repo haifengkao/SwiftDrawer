@@ -17,7 +17,7 @@ public enum SliderType {
     var isLeft: Bool {
         return self == .leftRear || self == .leftFront
     }
-    
+
     var isRear: Bool {
         return self == .leftRear || self == .rightRear
     }
@@ -32,10 +32,10 @@ public enum ShowStatus {
     case show
     case hide
     case moving(offset: CGFloat)
-    
+
     var isMoving: Bool {
         switch self {
-        case .moving(_):
+        case .moving:
             return true
         default:
             return false
@@ -43,10 +43,9 @@ public enum ShowStatus {
     }
 }
 
-
-
 public protocol SliderProtocol {
-    var type: SliderType {get}
+    var type: SliderType { get }
     init(type: SliderType)
 }
+
 public typealias SliderViewProtocol = (View & SliderProtocol)
